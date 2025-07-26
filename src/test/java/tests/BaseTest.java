@@ -54,6 +54,7 @@ public class BaseTest {
             Configuration.baseUrl = "https://app.atlantisdex.xyz";
             Configuration.timeout = 15000;
             Configuration.browserSize = null;
+            Configuration.headless = false;
             Configuration.browserCapabilities = getChromeOptions();
         }
 

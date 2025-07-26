@@ -40,6 +40,14 @@ jobs:
         run: |
           mvn clean test -DSEED_PHRASE="$SEED" -DPASSWORD="$PASS" -DNEW_PASSWORD="$NEWPASS"
 
+      - name: Debug X11 apps
+        if: always()
+        run: |
+          echo "Listing windows:"
+          xwininfo -root -tree || true
+          echo "Allure files:"
+          ls -l target/allure-results || true
+
       - name: Stop screen recording
         if: always()
         run: |

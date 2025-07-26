@@ -12,6 +12,7 @@ import org.testng.annotations.Parameters;
 import pages.SwapPage;
 import pages.WalletPage;
 import utils.PropertyReader;
+import utils.WindowFocusUtil;
 
 import java.awt.*;
 import java.nio.file.Paths;
@@ -56,6 +57,17 @@ public class BaseTest {
             Configuration.browserSize = null;
             Configuration.headless = false;
             Configuration.browserCapabilities = getChromeOptions();
+
+            String os = System.getProperty("os.name").toLowerCase();
+            if (os.contains("linux")) {
+
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                WindowFocusUtil.focusWindowByName("Chrome");
+            }
         }
 
         swapPage = new SwapPage();

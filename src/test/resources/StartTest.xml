@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite thread-count="1" name="AtlantisDEX" parallel="false">
+    <listeners>
+        <listener class-name="utils.TestListener"/>
+        <listener class-name="utils.AnnotationTransformer"/>
+    </listeners>
+    <test name="Chrome UI Tests">
+        <classes>
+            <class name="tests.SwapTest"/>
+            <parameter name="browser" value="chrome"/>
+        </classes>
+    </test>
+</suite>

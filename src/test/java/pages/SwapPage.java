@@ -58,9 +58,11 @@ public class SwapPage extends BasePage {
         return this;
     }
 
-    public SwapPage connectWallet() {
+    public SwapPage connectWallet() throws InterruptedException {
         $(byText("Connect")).click();
         $(byText("HaHa Wallet")).shouldBe(visible).click();
+
+        Thread.sleep(30000);
 
         robot.delay(3000);
 

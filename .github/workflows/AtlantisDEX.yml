@@ -53,6 +53,12 @@ jobs:
           name: screen-recording
           path: screen_recording.mp4
 
+      - name: Move screen recording to allure-results
+        if: always()
+        run: |
+          mkdir -p target/allure-results
+          cp screen_recording.mp4 target/allure-results/
+
       - name: Get Allure history
         uses: actions/checkout@v2
         if: always()
@@ -73,9 +79,3 @@ jobs:
           PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PUBLISH_BRANCH: gh-pages
           PUBLISH_DIR: allure-history
-
-      - name: Move screen recording to allure-results
-        if: always()
-        run: |
-          mkdir -p target/allure-results
-          cp screen_recording.mp4 target/allure-results/

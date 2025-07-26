@@ -16,6 +16,7 @@ import utils.PropertyReader;
 import java.awt.*;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.HashMap;
 
 import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
 import static utils.PropertyReader.getProperty;
@@ -52,7 +53,7 @@ public class BaseTest {
             Configuration.browser = "chrome";
             Configuration.baseUrl = "https://app.atlantisdex.xyz";
             Configuration.timeout = 15000;
-            Configuration.browserSize = null;
+            Configuration.browserSize = "1366x768";
             Configuration.browserCapabilities = getChromeOptions();
         }
 
@@ -64,6 +65,18 @@ public class BaseTest {
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--disable-extensions-except=" + EXTENSION_PATH);
         options.addArguments("--load-extension=" + EXTENSION_PATH);
+        HashMap<String, Object> chromePrefs = new HashMap<>();
+        chromePrefs.put("credentials_enable_service", false);
+        chromePrefs.put("profile.password_manager_enabled", false);
+        options.setExperimentalOption("prefs", chromePrefs);
+        options.addArguments("--lang=en");
+        options.addArguments("--disable-notifications");
+        options.addArguments("--disable-popup-blocking");
+        options.addArguments("--disable-infobars");
+        options.addArguments("--headless");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-gpu");
         options.addArguments("--disable-blink-features=AutomationControlled");
         options.setExperimentalOption("excludeSwitches",
                 Collections.singletonList("enable-automation"));

@@ -23,8 +23,10 @@ jobs:
           java-version: '17'
           distribution: 'liberica'
 
-      - name: Install tools (Xvfb + ffmpeg)
-        run: sudo apt-get update && sudo apt-get install -y xvfb ffmpeg x11-utils
+      - name: Install tools (Xvfb + ffmpeg + wmctrl)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb ffmpeg x11-utils wmctrl
 
       - name: Start Xvfb
         run: |
@@ -38,15 +40,20 @@ jobs:
 
       - name: Run UI tests
         run: |
+          echo "DISPLAY is $DISPLAY"
           mvn clean test -DSEED_PHRASE="$SEED" -DPASSWORD="$PASS" -DNEW_PASSWORD="$NEWPASS"
 
-      - name: Debug X11 apps
+      - name: Debug X11 apps and windows
         if: always()
         run: |
-          echo "Listing windows:"
+          echo "🪟 xwininfo - window tree:"
           xwininfo -root -tree || true
-          echo "Allure files:"
-          ls -l target/allure-results || true
+
+          echo "🪟 wmctrl - open windows:"
+          wmctrl -l || true
+
+          echo "📁 Allure results:"
+          ls -la target/allure-results || true
 
       - name: Stop screen recording
         if: always()
@@ -74,12 +81,14 @@ jobs:
         with:
           ref: gh-pages
           path: gh-pages
+
       - name: Allure Report action from marketplace
         uses: simple-elf/allure-report-action@master
         if: always()
         with:
           allure_results: target/allure-results
           allure_history: allure-history
+
       - name: Deploy report to Github Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v2

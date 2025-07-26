@@ -38,6 +38,11 @@ jobs:
           ffmpeg -y -video_size 1366x768 -framerate 15 -f x11grab -i :99 -codec:v libx264 -pix_fmt yuv420p screen_recording.mp4 > /dev/null 2>&1 &
           echo $! > ffmpeg_pid.txt
 
+      - name: Focus Chrome window before tests
+        run: |
+          sleep 5  # даём время браузеру открыться
+          wmctrl -a "Chrome" || true
+
       - name: Run UI tests
         run: |
           echo "DISPLAY is $DISPLAY"

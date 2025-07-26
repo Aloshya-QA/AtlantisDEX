@@ -20,7 +20,8 @@ public class WalletPage extends BasePage{
     }
 
     public WalletPage openLoginPage() {
-        open("chrome-extension://mcmnkoibcckclijbbienkflklahkphmi/home.html#onboarding/login");
+//        open("chrome-extension://mcmnkoibcckclijbbienkflklahkphmi/home.html#onboarding/login");
+        open("chrome-extension://baickakiacddlihiafkokkdklhnplgaj/home.html#onboarding/login");
         return this;
     }
 

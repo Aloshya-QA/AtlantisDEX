@@ -144,6 +144,7 @@ public class SwapPage extends BasePage {
         } else {
             log.info("Swapping MON tokens...");
             open(format("/swap/v4/?inputCurrency=%s&outputCurrency=%s", sellToken, buyToken));
+            $(byText("Cross-Chain Swap")).shouldBe(visible);
 
             while (totalTransactions > 0) {
                 log.info("Transaction #{}", totalTransactions);
@@ -167,7 +168,7 @@ public class SwapPage extends BasePage {
                 var tabs = driver.getWindowHandles().stream().toList();
                 driver.switchTo().window(tabs.get(0));
                 $(byText("Cross-Chain Swap")).shouldBe(visible);
-                Thread.sleep(3000);
+                Thread.sleep(5000);
 
 
                 totalTransactions--;

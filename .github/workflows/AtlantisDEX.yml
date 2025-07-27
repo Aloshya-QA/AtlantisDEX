@@ -1,0 +1,86 @@
+name: GUI CI with screen recording
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      DISPLAY: :99
+      SEED: ${{ secrets.SEED_PHRASE }}
+      PASS: ${{ secrets.PASSWORD }}
+      PIN: ${{ secrets.PIN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'liberica'
+
+      - name: Install tools (Xvfb + ffmpeg)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb ffmpeg x11-utils
+
+      - name: Start Xvfb
+        run: |
+          Xvfb :99 -screen 0 1366x768x24 &
+          sleep 3
+
+      - name: Start recording screen with ffmpeg
+        run: |
+          ffmpeg -y -video_size 1366x768 -framerate 15 -f x11grab -i :99 -codec:v libx264 -pix_fmt yuv420p screen_recording.mp4 > /dev/null 2>&1 &
+          echo $! > ffmpeg_pid.txt
+
+      - name: Run UI tests
+        run: |
+          echo "DISPLAY is $DISPLAY"
+          mvn clean test -DSEED_PHRASE="$SEED" -DPASSWORD="$PASS" -DPIN="$PIN"
+
+      - name: Stop screen recording
+        if: always()
+        run: |
+          kill -INT $(cat ffmpeg_pid.txt)
+          sleep 2
+
+      - name: Upload screen recording
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screen-recording
+          path: screen_recording.mp4
+
+      - name: Move screen recording to allure-results
+        if: always()
+        run: |
+          mkdir -p target/allure-results
+          cp screen_recording.mp4 target/allure-results/
+
+      - name: Get Allure history
+        uses: actions/checkout@v2
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Allure Report action from marketplace
+        uses: simple-elf/allure-report-action@master
+        if: always()
+        with:
+          allure_results: target/allure-results
+          allure_history: allure-history
+
+      - name: Deploy report to Github Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v2
+        env:
+          PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: allure-history

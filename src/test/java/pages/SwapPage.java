@@ -154,7 +154,7 @@ public class SwapPage extends BasePage {
                 $x(SWAP_BUTTON).should(enabled);
                 $x(SWAP_BUTTON).click();
 
-                Thread.sleep(7000);
+                Thread.sleep(10000);
 
                 WebDriver driver = WebDriverRunner.getWebDriver();
                 WebDriver newTab = driver.switchTo().newWindow(WindowType.TAB);
@@ -168,7 +168,7 @@ public class SwapPage extends BasePage {
                 var tabs = driver.getWindowHandles().stream().toList();
                 driver.switchTo().window(tabs.get(0));
                 $(byText("Cross-Chain Swap")).shouldBe(visible);
-                Thread.sleep(5000);
+                Thread.sleep(10000);
 
 
                 totalTransactions--;

@@ -64,8 +64,8 @@ public class SwapPage extends BasePage {
         $(byText("Connect")).click();
         $(byText("HaHa Wallet")).shouldBe(visible).click();
         Thread.sleep(2000);
-        open("chrome-extension://adaahjnbncfhalpbfifmklimghhecgep/popup.html");
-//        open("chrome-extension://baickakiacddlihiafkokkdklhnplgaj/popup.html");
+//        open("chrome-extension://adaahjnbncfhalpbfifmklimghhecgep/popup.html");
+        open("chrome-extension://baickakiacddlihiafkokkdklhnplgaj/popup.html");
         $(byText("Accept")).shouldBe(visible).click();
         return this;
     }
@@ -157,8 +157,8 @@ public class SwapPage extends BasePage {
 
                 WebDriver driver = WebDriverRunner.getWebDriver();
                 WebDriver newTab = driver.switchTo().newWindow(WindowType.TAB);
-//                newTab.get("chrome-extension://baickakiacddlihiafkokkdklhnplgaj/popup.html");
-                newTab.get("chrome-extension://adaahjnbncfhalpbfifmklimghhecgep/popup.html");
+                newTab.get("chrome-extension://baickakiacddlihiafkokkdklhnplgaj/popup.html");
+//                newTab.get("chrome-extension://adaahjnbncfhalpbfifmklimghhecgep/popup.html");
                 $(byText("Confirm")).shouldBe(visible).click();
                 $(byText("Confirm")).shouldNotBe(visible);
 

@@ -154,7 +154,7 @@ public class SwapPage extends BasePage {
                 $x(SWAP_BUTTON).should(enabled);
                 $x(SWAP_BUTTON).click();
 
-                Thread.sleep(5000);
+                Thread.sleep(7000);
 
                 WebDriver driver = WebDriverRunner.getWebDriver();
                 WebDriver newTab = driver.switchTo().newWindow(WindowType.TAB);

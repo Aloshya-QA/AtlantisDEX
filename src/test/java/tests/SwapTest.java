@@ -23,7 +23,7 @@ public class SwapTest extends BaseTest {
                 .walletConnectSuccessful()
                 .openPage()
                 .isOpened()
-                .swapTokens(mon, wmon, "0.1", 21);
+                .swapTokens(mon, wmon, "0.1", 22);
     }
 
 }

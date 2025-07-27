@@ -70,14 +70,6 @@ public class BaseTest {
         chromePrefs.put("profile.password_manager_enabled", false);
         options.setExperimentalOption("prefs", chromePrefs);
         options.addArguments("--lang=en");
-        options.addArguments("--disable-notifications");
-        options.addArguments("--disable-features=TabGroups");
-        options.addArguments("--new-window");
-        options.addArguments("--disable-gpu");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--disable-popup-blocking");
-        options.addArguments("--disable-infobars");
         options.addArguments("--disable-blink-features=AutomationControlled");
         options.setExperimentalOption("excludeSwitches",
                 Collections.singletonList("enable-automation"));

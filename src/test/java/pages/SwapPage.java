@@ -2,9 +2,7 @@ package pages;
 
 import com.codeborne.selenide.WebDriverRunner;
 import lombok.extern.log4j.Log4j2;
-import org.openqa.selenium.JavascriptException;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.*;
 import org.testng.Assert;
 
 import java.awt.*;
@@ -66,8 +64,8 @@ public class SwapPage extends BasePage {
         $(byText("Connect")).click();
         $(byText("HaHa Wallet")).shouldBe(visible).click();
         Thread.sleep(2000);
-//        open("chrome-extension://mcmnkoibcckclijbbienkflklahkphmi/popup.html#tx-confirmation/permission-confirmation");
-        open("chrome-extension://baickakiacddlihiafkokkdklhnplgaj/popup.html");
+        open("chrome-extension://adaahjnbncfhalpbfifmklimghhecgep/popup.html");
+//        open("chrome-extension://baickakiacddlihiafkokkdklhnplgaj/popup.html");
         $(byText("Accept")).shouldBe(visible).click();
         return this;
     }
@@ -145,20 +143,32 @@ public class SwapPage extends BasePage {
             }
         } else {
             log.info("Swapping MON tokens...");
+            open(format("/swap/v4/?inputCurrency=%s&outputCurrency=%s", sellToken, buyToken));
 
             while (totalTransactions > 0) {
                 log.info("Transaction #{}", totalTransactions);
-                open(format("/swap/v4/?inputCurrency=%s&outputCurrency=%s", sellToken, buyToken));
+                $x(SELL_INPUT).sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
+                $x(SELL_INPUT).should(attribute("value", ""));
                 $x(SELL_INPUT).setValue(amount);
                 $x(SWAP_BUTTON).should(enabled);
                 $x(SWAP_BUTTON).click();
 
                 Thread.sleep(5000);
 
-//                open("chrome-extension://mcmnkoibcckclijbbienkflklahkphmi/popup.html#tx-confirmation/permission-confirmation");
-                open("chrome-extension://baickakiacddlihiafkokkdklhnplgaj/popup.html");
+                WebDriver driver = WebDriverRunner.getWebDriver();
+                WebDriver newTab = driver.switchTo().newWindow(WindowType.TAB);
+//                newTab.get("chrome-extension://baickakiacddlihiafkokkdklhnplgaj/popup.html");
+                newTab.get("chrome-extension://adaahjnbncfhalpbfifmklimghhecgep/popup.html");
                 $(byText("Confirm")).shouldBe(visible).click();
                 $(byText("Confirm")).shouldNotBe(visible);
+
+                newTab.close();
+
+                var tabs = driver.getWindowHandles().stream().toList();
+                driver.switchTo().window(tabs.get(0));
+                $(byText("Cross-Chain Swap")).shouldBe(visible);
+                Thread.sleep(3000);
+
 
                 totalTransactions--;
             }

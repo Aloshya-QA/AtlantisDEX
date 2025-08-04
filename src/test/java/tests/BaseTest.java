@@ -5,12 +5,10 @@ import com.codeborne.selenide.logevents.SelenideLogger;
 import io.qameta.allure.selenide.AllureSelenide;
 import lombok.extern.log4j.Log4j2;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Optional;
-import org.testng.annotations.Parameters;
+import org.testng.annotations.*;
 import pages.SwapPage;
 import pages.WalletPage;
+import utils.TestListener;
 
 import java.awt.*;
 import java.nio.file.Paths;
@@ -21,6 +19,7 @@ import static com.codeborne.selenide.WebDriverRunner.getWebDriver;
 import static utils.PropertyReader.getProperty;
 
 @Log4j2
+@Listeners(TestListener.class)
 public class BaseTest {
 
     SwapPage swapPage;

@@ -41,7 +41,9 @@ jobs:
       - name: Run UI tests
         run: |
           echo "DISPLAY is $DISPLAY"
-          mvn clean test -DSEED_PHRASE="$SEED" -DPASSWORD="$PASS" -DPIN="$PIN"
+          mvn clean test \
+          -DsuiteXmlFile='src/test/resources/StartSwap.xml' \
+          -DSEED_PHRASE="$SEED" -DPASSWORD="$PASS" -DPIN="$PIN"
 
       - name: Stop screen recording
         if: always()

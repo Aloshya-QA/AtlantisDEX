@@ -1,2 +1,2 @@
 "DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","529885","swapTokens","Surefire suite","Sun Aug 10 06:34:56 GMT 2025","passed","Sun Aug 10 06:43:46 GMT 2025","tests.SwapTest","Surefire test","tests.SwapTest","swapTokens"
+"","36199","swapTokens","Surefire suite","Sun Aug 10 08:57:11 GMT 2025","failed","Sun Aug 10 08:57:47 GMT 2025","tests.SwapTest","Surefire test","tests.SwapTest","swapTokens"

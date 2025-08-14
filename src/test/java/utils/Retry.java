@@ -7,24 +7,23 @@ import org.testng.ITestResult;
 @Log4j2
 public class Retry implements IRetryAnalyzer {
 
+    private int attempt = 1;
     private static final int MAX_RETRY = 3;
 
     @Override
     public boolean retry(ITestResult iTestResult) {
-        Integer retryCount = (Integer) iTestResult.getAttribute("retryCount");
-
-        if (retryCount == null) {
-            retryCount = 0;
-        }
-
-        if (retryCount < MAX_RETRY) {
-            retryCount++;
-            iTestResult.setAttribute("retryCount", retryCount);
-            log.warn("Retrying test '{}' - attempt {}/{}", iTestResult.getName(), retryCount, MAX_RETRY);
-            return true;
+        if (!iTestResult.isSuccess()) {
+            if (attempt < MAX_RETRY) {
+                attempt++;
+                iTestResult.setStatus(ITestResult.FAILURE);
+                log.warn("Retrying once again");
+                return true;
+            } else {
+                iTestResult.setStatus(ITestResult.FAILURE);
+            }
         } else {
-            log.error("Test '{}' failed after {} attempts", iTestResult.getName(), MAX_RETRY);
-            return false;
+            iTestResult.setStatus(ITestResult.SUCCESS);
         }
+        return false;
     }
 }

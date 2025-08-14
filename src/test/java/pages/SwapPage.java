@@ -10,6 +10,7 @@ import java.awt.event.KeyEvent;
 
 import static com.codeborne.selenide.Condition.*;
 import static com.codeborne.selenide.Selectors.byText;
+import static com.codeborne.selenide.Selectors.shadowDeepCss;
 import static com.codeborne.selenide.Selenide.*;
 import static java.lang.String.format;
 
@@ -62,7 +63,9 @@ public class SwapPage extends BasePage {
 
     public SwapPage connectWallet() throws InterruptedException {
         $(byText("Connect")).click();
-        $(byText("HaHa Wallet")).shouldBe(visible).click();
+        $("w3m-modal").shouldBe(visible);
+        $(shadowDeepCss("[data-testid='wallet-selector-haha.me']")).click();
+
         Thread.sleep(2000);
 //        open("chrome-extension://adaahjnbncfhalpbfifmklimghhecgep/popup.html");
         open("chrome-extension://baickakiacddlihiafkokkdklhnplgaj/popup.html");

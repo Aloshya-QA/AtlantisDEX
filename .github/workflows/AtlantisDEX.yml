@@ -23,7 +23,10 @@ jobs:
           java-version: '17'
           distribution: 'liberica'
 
-      - name: Set up Chrome 138
+      - name: Remove preinstalled Chrome
+        run: sudo apt-get remove -y google-chrome-stable
+
+      - name: Install Chrome 138 + ChromeDriver
         uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: 138

@@ -24,6 +24,6 @@ public class SwapTest extends BaseTest {
     //             .openPage()
     //             .isOpened()
     //             .swapTokens(mon, wmon, "0.1", 22);
-    // }
+    }
 
 }

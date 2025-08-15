@@ -29,6 +29,10 @@ jobs:
           chrome-version: 138
           install-chromedriver: true
 
+      - run: |
+          google-chrome --version
+          chromedriver --version
+
       - name: Install tools (Xvfb + ffmpeg)
         run: |
           sudo apt-get update

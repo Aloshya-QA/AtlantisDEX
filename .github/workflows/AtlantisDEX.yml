@@ -23,15 +23,26 @@ jobs:
           java-version: '17'
           distribution: 'liberica'
 
-      - name: Remove preinstalled Chrome
-        run: sudo apt-get remove -y google-chrome-stable
-
-      - name: Install Chrome 138 + ChromeDriver
+      # -----------------------------
+      # Установка Chrome 138 + Chromedriver 138
+      - name: Setup Chrome 138
         uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: 138
           install-chromedriver: true
 
+      # Добавляем их в PATH, чтобы google-chrome и chromedriver работали
+      - name: Add Chrome and Chromedriver to PATH
+        run: |
+          echo "/opt/hostedtoolcache/setup-chrome/chrome/138.0.7204.183/x64" >> $GITHUB_PATH
+          echo "/opt/hostedtoolcache/setup-chrome/chromedriver/138.0.7204.183/x64" >> $GITHUB_PATH
+
+      - name: Verify Chrome versions
+        run: |
+          google-chrome --version
+          chromedriver --version
+
+      # -----------------------------
       - name: Install tools (Xvfb + ffmpeg)
         run: |
           sudo apt-get update
@@ -51,8 +62,8 @@ jobs:
         run: |
           echo "DISPLAY is $DISPLAY"
           mvn clean test \
-          -DsuiteXmlFile='src/test/resources/StartSwap.xml' \
-          -DSEED_PHRASE="$SEED" -DPASSWORD="$PASS" -DPIN="$PIN"
+            -DsuiteXmlFile='src/test/resources/StartSwap.xml' \
+            -DSEED_PHRASE="$SEED" -DPASSWORD="$PASS" -DPIN="$PIN"
 
       - name: Stop screen recording
         if: always()

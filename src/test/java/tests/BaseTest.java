@@ -51,8 +51,11 @@ public class BaseTest {
             Configuration.browser = "chrome";
             Configuration.baseUrl = "https://app.atlantisdex.xyz";
             Configuration.timeout = 15000;
-            Configuration.browserSize = "1366x768";
+            Configuration.browserSize = null;
             Configuration.headless = false;
+            System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver");
+            System.setProperty("selenide.browser", "chrome");
+            System.setProperty("webdriver.chrome.whitelistedIps", "");
             Configuration.browserCapabilities = getChromeOptions();
         }
 

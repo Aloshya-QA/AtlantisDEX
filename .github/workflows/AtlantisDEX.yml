@@ -23,6 +23,12 @@ jobs:
           java-version: '17'
           distribution: 'liberica'
 
+      - name: Set up Chrome 138
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: 138
+          install-chromedriver: true
+
       - name: Install tools (Xvfb + ffmpeg)
         run: |
           sudo apt-get update

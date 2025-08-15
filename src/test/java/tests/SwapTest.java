@@ -8,6 +8,7 @@ public class SwapTest extends BaseTest {
     public void swapTokens() throws InterruptedException {
         swapPage.openPage()
                 .isOpened();
+        Thread.sleep(10000);
     //             .closeAnotherTabs();
     //     walletPage.openLoginPage()
     //             .isLoginPageOpened()

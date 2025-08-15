@@ -23,15 +23,15 @@ jobs:
           java-version: '17'
           distribution: 'liberica'
 
-      # -----------------------------
-      # Установка Chrome 138 + Chromedriver 138
+      - name: Remove preinstalled Chrome
+        run: sudo apt-get remove -y google-chrome-stable
+
       - name: Setup Chrome 138
         uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: 138
           install-chromedriver: true
 
-      # Добавляем их в PATH, чтобы google-chrome и chromedriver работали
       - name: Add Chrome and Chromedriver to PATH
         run: |
           echo "/opt/hostedtoolcache/setup-chrome/chrome/138.0.7204.183/x64" >> $GITHUB_PATH
@@ -42,7 +42,6 @@ jobs:
           google-chrome --version
           chromedriver --version
 
-      # -----------------------------
       - name: Install tools (Xvfb + ffmpeg)
         run: |
           sudo apt-get update

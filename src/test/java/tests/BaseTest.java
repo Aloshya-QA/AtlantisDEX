@@ -53,7 +53,8 @@ public class BaseTest {
             Configuration.timeout = 15000;
             Configuration.browserSize = null;
             Configuration.headless = false;
-            System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver");
+            System.setProperty("webdriver.chrome.driver",
+                    "/opt/hostedtoolcache/setup-chrome/chromedriver/138.0.7204.183/x64/chromedriver");
             System.setProperty("selenide.browser", "chrome");
             System.setProperty("webdriver.chrome.whitelistedIps", "");
             Configuration.browserCapabilities = getChromeOptions();

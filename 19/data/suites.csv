@@ -1,0 +1,3 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","0","TearDawn","Surefire suite","Fri Aug 15 21:32:48 UTC 2025","broken","Fri Aug 15 21:32:48 UTC 2025","tests.SwapTest","Surefire test","tests.SwapTest","TearDawn"
+"","4209","swapTokens","Surefire suite","Fri Aug 15 21:32:44 UTC 2025","broken","Fri Aug 15 21:32:48 UTC 2025","tests.SwapTest","Surefire test","tests.SwapTest","swapTokens"

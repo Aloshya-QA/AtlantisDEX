@@ -1,4 +1,4 @@
-name: GUI CI with Chrome 138 in Docker
+name: GUI CI in Docker with Chrome 138
 
 on:
   push:
@@ -25,9 +25,6 @@ jobs:
           restore-keys: |
             maven-${{ runner.os }}-
 
-      - name: List repo files
-        run: ls -la
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -52,18 +49,15 @@ jobs:
             -v ~/.m2:/root/.m2 \
             ci-chrome138:latest \
             bash -c "
-              cd /workspace && \
-              echo 'Запускаем Xvfb...' && \
-              Xvfb :99 -screen 0 1366x768x24 & sleep 3 && \
+              cd /workspace
+              echo 'Запускаем Xvfb...' && Xvfb :99 -screen 0 1366x768x24 & sleep 3
               echo 'Старт записи экрана...' && \
               ffmpeg -y -video_size 1366x768 -framerate 15 -f x11grab -i :99 \
-                -codec:v libx264 -pix_fmt yuv420p screen_recording.mp4 > /dev/null 2>&1 & echo \$! > ffmpeg_pid.txt && \
+                -codec:v libx264 -pix_fmt yuv420p screen_recording.mp4 > /dev/null 2>&1 & echo \$! > ffmpeg_pid.txt
               echo 'Запуск UI тестов...' && \
-              mvn -B clean test \
-                -DsuiteXmlFile='src/test/resources/StartSwap.xml' \
-                -DSEED_PHRASE=\$SEED -DPASSWORD=\$PASS -DPIN=\$PIN ; \
-              echo 'Остановка записи...' && \
-              kill -INT \$(cat ffmpeg_pid.txt) && sleep 2 && \
+              mvn -B clean test -DsuiteXmlFile='src/test/resources/StartSwap.xml' \
+                  -DSEED_PHRASE=\$SEED -DPASSWORD=\$PASS -DPIN=\$PIN
+              echo 'Остановка записи...' && kill -INT \$(cat ffmpeg_pid.txt) && sleep 2
               mkdir -p target/allure-results && cp screen_recording.mp4 target/allure-results/
             "
 
@@ -82,14 +76,14 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
-      - name: Allure Report action from marketplace
+      - name: Generate Allure report
         uses: simple-elf/allure-report-action@master
         if: always()
         with:
           allure_results: target/allure-results
           allure_history: allure-history
 
-      - name: Deploy report to Github Pages
+      - name: Deploy Allure report to GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v2
         env:

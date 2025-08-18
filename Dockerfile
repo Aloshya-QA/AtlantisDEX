@@ -1,14 +1,12 @@
-FROM maven:3.9.9-eclipse-temurin-17
+FROM ubuntu:24.04
 
-# Установка всех библиотек для Chrome 138
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        wget unzip xvfb ffmpeg x11-utils ca-certificates \
-        libnspr4 libnss3 libatk1.0-0 libatk-bridge2.0-0 \
-        libcups2 libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 \
-        libgtk-3-0 libasound2 libdbus-glib-1-2 libpangocairo-1.0-0 \
-        fonts-liberation libxss1 libgconf-2-4 \
-    && rm -rf /var/lib/apt/lists/*
+# Обновление системы и установка JDK + Maven + утилиты для тестов
+RUN apt-get update && apt-get upgrade -y && \
+    apt-get install -y openjdk-17-jdk maven wget unzip xvfb ffmpeg x11-utils ca-certificates \
+        libnspr4 libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libx11-xcb1 libxcomposite1 \
+        libxdamage1 libxrandr2 libgtk-3-0 libasound2 libdbus-glib-1-2 libpangocairo-1.0-0 \
+        fonts-liberation libxss1 libgconf-2-4 && \
+    rm -rf /var/lib/apt/lists/*
 
 # Установка Chrome 138
 RUN wget https://storage.googleapis.com/chrome-for-testing-public/138.0.7204.183/linux64/chrome-linux64.zip && \

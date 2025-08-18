@@ -25,20 +25,11 @@ jobs:
           restore-keys: |
             maven-${{ runner.os }}-
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Build Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: Dockerfile
-          push: false
-          tags: ci-chrome138:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        run: |
+          docker build -t ci-chrome138:latest .
 
-      - name: Run tests inside Docker
+      - name: Run UI tests inside Docker
         run: |
           docker run --rm \
             -e DISPLAY=$DISPLAY \
@@ -50,14 +41,17 @@ jobs:
             ci-chrome138:latest \
             bash -c "
               cd /workspace
-              echo 'Запускаем Xvfb...' && Xvfb :99 -screen 0 1366x768x24 & sleep 3
-              echo 'Старт записи экрана...' && \
+              # Запуск виртуального дисплея
+              Xvfb :99 -screen 0 1366x768x24 & sleep 3
+              # Старт записи экрана
               ffmpeg -y -video_size 1366x768 -framerate 15 -f x11grab -i :99 \
                 -codec:v libx264 -pix_fmt yuv420p screen_recording.mp4 > /dev/null 2>&1 & echo \$! > ffmpeg_pid.txt
-              echo 'Запуск UI тестов...' && \
+              # Запуск тестов
               mvn -B clean test -DsuiteXmlFile='src/test/resources/StartSwap.xml' \
                   -DSEED_PHRASE=\$SEED -DPASSWORD=\$PASS -DPIN=\$PIN
-              echo 'Остановка записи...' && kill -INT \$(cat ffmpeg_pid.txt) && sleep 2
+              # Остановка записи
+              kill -INT \$(cat ffmpeg_pid.txt) && sleep 2
+              # Сохраняем видео для Allure
               mkdir -p target/allure-results && cp screen_recording.mp4 target/allure-results/
             "
 

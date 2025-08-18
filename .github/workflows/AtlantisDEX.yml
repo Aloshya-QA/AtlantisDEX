@@ -1,4 +1,4 @@
-name: GUI CI in Docker
+name: GUI CI with screen recording (Docker)
 
 on:
   push:
@@ -6,55 +6,75 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/your-org/ci-chrome138:latest   # наш докер-образ
+      options: --shm-size=2g
+
+    env:
+      DISPLAY: :99
+      SEED: ${{ secrets.SEED_PHRASE }}
+      PASS: ${{ secrets.PASSWORD }}
+      PIN: ${{ secrets.PIN }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Build Docker image
+      - name: Start Xvfb
         run: |
-          docker build -f Dockerfile.ci -t atlantisdex/ci-chrome-138:latest .
+          Xvfb :99 -screen 0 1366x768x24 &
+          sleep 3
 
-      - name: Run tests in Docker
-        env:
-          SEED: ${{ secrets.SEED_PHRASE }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          PIN: ${{ secrets.PIN }}
+      - name: Start recording screen with ffmpeg
         run: |
-          docker run --rm \
-            -v ${{ github.workspace }}:/app \
-            -w /app \
-            -e SEED \
-            -e PASSWORD \
-            -e PIN \
-            atlantisdex/ci-chrome-138:latest
+          ffmpeg -y -video_size 1366x768 -framerate 15 -f x11grab -i :99 \
+            -codec:v libx264 -pix_fmt yuv420p screen_recording.mp4 > /dev/null 2>&1 &
+          echo $! > ffmpeg_pid.txt
+
+      - name: Run UI tests
+        run: |
+          mvn clean test \
+            -DsuiteXmlFile='src/test/resources/StartSwap.xml' \
+            -DSEED_PHRASE="$SEED" -DPASSWORD="$PASS" -DPIN="$PIN"
+
+      - name: Stop screen recording
+        if: always()
+        run: |
+          kill -INT $(cat ffmpeg_pid.txt)
+          sleep 2
 
       - name: Upload screen recording
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: screen-recording
-          path: target/allure-results/screen_recording.mp4
+          path: screen_recording.mp4
+
+      - name: Move screen recording to allure-results
+        if: always()
+        run: |
+          mkdir -p target/allure-results
+          cp screen_recording.mp4 target/allure-results/
 
       - name: Get Allure history
+        uses: actions/checkout@v2
         if: always()
-        uses: actions/checkout@v4
+        continue-on-error: true
         with:
           ref: gh-pages
           path: gh-pages
-        continue-on-error: true
 
-      - name: Generate Allure report
-        if: always()
+      - name: Allure Report action from marketplace
         uses: simple-elf/allure-report-action@master
+        if: always()
         with:
           allure_results: target/allure-results
-          allure_history: gh-pages/allure-history
+          allure_history: allure-history
 
-      - name: Deploy report to GitHub Pages
+      - name: Deploy report to Github Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v2
-        with:
-          publish_dir: gh-pages/allure-history
-          publish_branch: gh-pages
-          personal_token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: allure-history

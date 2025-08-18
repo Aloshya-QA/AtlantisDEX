@@ -1,50 +1,19 @@
-# Dockerfile.ci
-FROM ubuntu:22.04
+FROM maven:3.9.9-eclipse-temurin-17
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    DISPLAY=:99 \
-    TZ=Etc/UTC
+# Устанавливаем Chrome 138 и Chromedriver 138
+RUN apt-get update && apt-get install -y wget gnupg unzip xvfb ffmpeg x11-utils \
+ && wget https://storage.googleapis.com/chrome-for-testing-public/138.0.7204.183/linux64/chrome-linux64.zip \
+ && unzip chrome-linux64.zip -d /opt/ \
+ && mv /opt/chrome-linux64 /opt/chrome \
+ && ln -s /opt/chrome/chrome /usr/bin/google-chrome \
+ && wget https://storage.googleapis.com/chrome-for-testing-public/138.0.7204.183/linux64/chromedriver-linux64.zip \
+ && unzip chromedriver-linux64.zip -d /opt/ \
+ && mv /opt/chromedriver-linux64/chromedriver /usr/bin/chromedriver \
+ && chmod +x /usr/bin/chromedriver \
+ && rm -rf *.zip \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# 1) Устанавливаем базовые пакеты
-RUN apt-get update && apt-get install -y \
-    openjdk-17-jdk \
-    maven \
-    wget \
-    gnupg \
-    apt-transport-https \
-    xvfb \
-    ffmpeg \
-    x11-utils \
-    unzip \
-    curl \
-  && rm -rf /var/lib/apt/lists/*
+# Проверяем версии
+RUN google-chrome --version && chromedriver --version
 
-# 2) Устанавливаем Chrome 138
-RUN wget -qO- https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
- && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" \
-      > /etc/apt/sources.list.d/google-chrome.list \
- && apt-get update \
- && apt-get install -y google-chrome-stable=138.0.7204.183-1 \
- && rm -rf /var/lib/apt/lists/*
-
-# 3) Устанавливаем Chromedriver той же версии
-RUN CHROME_VER=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+\.\d+') \
- && LATEST=$(curl -sSL "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VER}") \
- && wget -O /tmp/chromedriver.zip "https://chromedriver.storage.googleapis.com/${LATEST}/chromedriver_linux64.zip" \
- && unzip /tmp/chromedriver.zip -d /usr/local/bin \
- && chmod +x /usr/local/bin/chromedriver \
- && rm /tmp/chromedriver.zip
-
-# 4) Копируем проект и предварительно кешируем зависимости
-WORKDIR /app
-COPY pom.xml .
-# кешируем зависимости, чтобы не тянуть на каждом билде
-RUN mvn dependency:go-offline -B
-
-COPY . .
-
-# 5) Копируем entrypoint-скрипт
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
+WORKDIR /workspace

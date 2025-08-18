@@ -26,11 +26,15 @@ jobs:
           restore-keys: |
             maven-${{ runner.os }}-
 
+      # Проверка файлов репозитория
+      - name: List repo files
+        run: ls -la
+
       # Настройка Buildx (для кеша Docker)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Сборка Docker с кешем на GitHub Actions
+      # Сборка Docker с кешем
       - name: Build Docker image with cache
         uses: docker/build-push-action@v5
         with:

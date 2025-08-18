@@ -53,10 +53,6 @@ public class BaseTest {
             Configuration.timeout = 15000;
             Configuration.browserSize = null;
             Configuration.headless = false;
-            System.setProperty("webdriver.chrome.driver",
-                    "/opt/hostedtoolcache/setup-chrome/chromedriver/138.0.7204.183/x64/chromedriver");
-            System.setProperty("selenide.browser", "chrome");
-            System.setProperty("webdriver.chrome.whitelistedIps", "");
             Configuration.browserCapabilities = getChromeOptions();
         }
 
@@ -69,8 +65,6 @@ public class BaseTest {
         options.addArguments("--disable-extensions-except=" + EXTENSION_PATH);
         options.addArguments("--load-extension=" + EXTENSION_PATH);
         HashMap<String, Object> chromePrefs = new HashMap<>();
-        chromePrefs.put("credentials_enable_service", false);
-        chromePrefs.put("profile.password_manager_enabled", false);
         options.setExperimentalOption("prefs", chromePrefs);
         options.addArguments("--lang=en");
         options.addArguments("--disable-blink-features=AutomationControlled");

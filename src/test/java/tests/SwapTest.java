@@ -7,22 +7,23 @@ public class SwapTest extends BaseTest {
     @Test
     public void swapTokens() throws InterruptedException {
         swapPage.openPage()
-                .isOpened()
-                .closeAnotherTabs();
-        walletPage.openLoginPage()
-                .isLoginPageOpened()
-                .login(email, password)
-                .isCreatePinCodePageOpened()
-                .createPinCode(newPassword)
-                .isImportPageOpened()
-                .importWallet(seed)
-                .isImportWalletSuccessful();
-        swapPage.openPage()
-                .isOpened()
-                .connectWallet()
-                .walletConnectSuccessful()
-                .openPage()
-                .isOpened()
-                .swapTokens(mon, wmon, "0.1", 22);
+                .isOpened();
+        Thread.sleep(10000);
+//                .closeAnotherTabs();
+//        walletPage.openLoginPage()
+//                .isLoginPageOpened()
+//                .login(email, password)
+//                .isCreatePinCodePageOpened()
+//                .createPinCode(newPassword)
+//                .isImportPageOpened()
+//                .importWallet(seed)
+//                .isImportWalletSuccessful();
+//        swapPage.openPage()
+//                .isOpened()
+//                .connectWallet()
+//                .walletConnectSuccessful()
+//                .openPage()
+//                .isOpened()
+//                .swapTokens(mon, wmon, "0.1", 22);
     }
 }

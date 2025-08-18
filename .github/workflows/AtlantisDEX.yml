@@ -1,4 +1,4 @@
-name: GUI CI with screen recording
+name: GUI CI in Docker
 
 on:
   push:
@@ -7,103 +7,54 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      DISPLAY: :99
-      SEED: ${{ secrets.SEED_PHRASE }}
-      PASS: ${{ secrets.PASSWORD }}
-      PIN: ${{ secrets.PIN }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'liberica'
-
-      # -----------------------------
-      # Устанавливаем Chrome 138 + Chromedriver 138
-      - name: Setup Chrome 138
-        uses: browser-actions/setup-chrome@v2
-        with:
-          chrome-version: 138
-          install-chromedriver: true
-
-      # Добавляем Chrome и Chromedriver в PATH, чтобы google-chrome и chromedriver были доступны
-      - name: Add Chrome and Chromedriver to PATH
+      - name: Build Docker image
         run: |
-          echo "/opt/hostedtoolcache/setup-chrome/chrome/138.0.7204.183/x64" >> $GITHUB_PATH
-          echo "/opt/hostedtoolcache/setup-chrome/chromedriver/138.0.7204.183/x64" >> $GITHUB_PATH
+          docker build -f Dockerfile.ci -t atlantisdex/ci-chrome-138:latest .
 
-      # Проверяем версии
-      - name: Verify Chrome versions
+      - name: Run tests in Docker
+        env:
+          SEED: ${{ secrets.SEED_PHRASE }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          PIN: ${{ secrets.PIN }}
         run: |
-          google-chrome --version
-          chromedriver --version
-
-      # -----------------------------
-      - name: Install tools (Xvfb + ffmpeg)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb ffmpeg x11-utils
-
-      - name: Start Xvfb
-        run: |
-          Xvfb :99 -screen 0 1366x768x24 &
-          sleep 3
-
-      - name: Start recording screen with ffmpeg
-        run: |
-          ffmpeg -y -video_size 1366x768 -framerate 15 -f x11grab -i :99 -codec:v libx264 -pix_fmt yuv420p screen_recording.mp4 > /dev/null 2>&1 &
-          echo $! > ffmpeg_pid.txt
-
-      - name: Run UI tests
-        run: |
-          echo "DISPLAY is $DISPLAY"
-          mvn clean test \
-            -DsuiteXmlFile='src/test/resources/StartSwap.xml' \
-            -DSEED_PHRASE="$SEED" -DPASSWORD="$PASS" -DPIN="$PIN"
-
-      - name: Stop screen recording
-        if: always()
-        run: |
-          kill -INT $(cat ffmpeg_pid.txt)
-          sleep 2
+          docker run --rm \
+            -v ${{ github.workspace }}:/app \
+            -w /app \
+            -e SEED \
+            -e PASSWORD \
+            -e PIN \
+            atlantisdex/ci-chrome-138:latest
 
       - name: Upload screen recording
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: screen-recording
-          path: screen_recording.mp4
-
-      - name: Move screen recording to allure-results
-        if: always()
-        run: |
-          mkdir -p target/allure-results
-          cp screen_recording.mp4 target/allure-results/
+          path: target/allure-results/screen_recording.mp4
 
       - name: Get Allure history
-        uses: actions/checkout@v2
         if: always()
-        continue-on-error: true
+        uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: gh-pages
+        continue-on-error: true
 
-      - name: Allure Report action from marketplace
-        uses: simple-elf/allure-report-action@master
+      - name: Generate Allure report
         if: always()
+        uses: simple-elf/allure-report-action@master
         with:
           allure_results: target/allure-results
-          allure_history: allure-history
+          allure_history: gh-pages/allure-history
 
-      - name: Deploy report to Github Pages
+      - name: Deploy report to GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v2
-        env:
-          PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PUBLISH_BRANCH: gh-pages
-          PUBLISH_DIR: allure-history
+        with:
+          publish_dir: gh-pages/allure-history
+          publish_branch: gh-pages
+          personal_token: ${{ secrets.GITHUB_TOKEN }}

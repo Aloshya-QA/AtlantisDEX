@@ -11,18 +11,19 @@ RUN apt-get update && apt-get upgrade -y && \
         libgconf-2-4 && \
     rm -rf /var/lib/apt/lists/*
 
-# Установка Chrome 138.0.7204.157 (не Chrome for Testing)
-RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_138.0.7204.157-1_amd64.deb && \
-    apt-get update && apt-get install -y ./google-chrome-stable_138.0.7204.157-1_amd64.deb && \
-    rm google-chrome-stable_138.0.7204.157-1_amd64.deb && \
-    ln -s /usr/bin/google-chrome-stable /usr/bin/google-chrome
+# Установка Chrome 138
+RUN wget https://storage.googleapis.com/chrome-for-testing-public/138.0.7204.183/linux64/chrome-linux64.zip && \
+    unzip chrome-linux64.zip -d /opt/ && \
+    mv /opt/chrome-linux64 /opt/chrome && \
+    ln -s /opt/chrome/chrome /usr/bin/google-chrome && \
+    rm chrome-linux64.zip
 
-# Установка Chromedriver 138.0.7204.157
-RUN wget -q https://chromedriver.storage.googleapis.com/138.0.7204.157/chromedriver_linux64.zip && \
-    unzip chromedriver_linux64.zip -d /tmp/ && \
-    mv /tmp/chromedriver /usr/bin/chromedriver && \
+# Установка Chromedriver 138
+RUN wget https://storage.googleapis.com/chrome-for-testing-public/138.0.7204.183/linux64/chromedriver-linux64.zip && \
+    unzip chromedriver-linux64.zip -d /tmp/ && \
+    mv /tmp/chromedriver-linux64/chromedriver /usr/bin/chromedriver && \
     chmod +x /usr/bin/chromedriver && \
-    rm chromedriver_linux64.zip
+    rm -rf /tmp/chromedriver-linux64 chromedriver-linux64.zip
 
 # Проверка версий
 RUN google-chrome --version && chromedriver --version && java -version && mvn -version

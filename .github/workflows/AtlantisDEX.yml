@@ -1,4 +1,4 @@
-name: GUI CI with screen recording (Docker)
+name: GUI CI with Chrome 138 in Docker
 
 on:
   push:
@@ -6,9 +6,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/your-org/ci-chrome138:latest   # наш докер-образ
-      options: --shm-size=2g
 
     env:
       DISPLAY: :99
@@ -20,29 +17,38 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Start Xvfb
+      # Строим Docker-образ прямо в CI
+      - name: Build Docker image
         run: |
-          Xvfb :99 -screen 0 1366x768x24 &
-          sleep 3
+          docker build -t ci-chrome138 -f Dockerfile.ci .
 
-      - name: Start recording screen with ffmpeg
+      # Запускаем контейнер и тесты
+      - name: Run tests inside Docker
         run: |
-          ffmpeg -y -video_size 1366x768 -framerate 15 -f x11grab -i :99 \
-            -codec:v libx264 -pix_fmt yuv420p screen_recording.mp4 > /dev/null 2>&1 &
-          echo $! > ffmpeg_pid.txt
+          docker run --rm \
+            -e DISPLAY=$DISPLAY \
+            -e SEED="$SEED" \
+            -e PASS="$PASS" \
+            -e PIN="$PIN" \
+            -v ${{ github.workspace }}:/workspace \
+            ci-chrome138 \
+            bash -c "
+              cd /workspace && \
+              echo 'Запускаем Xvfb...' && \
+              Xvfb :99 -screen 0 1366x768x24 & sleep 3 && \
+              echo 'Старт записи экрана...' && \
+              ffmpeg -y -video_size 1366x768 -framerate 15 -f x11grab -i :99 \
+                -codec:v libx264 -pix_fmt yuv420p screen_recording.mp4 > /dev/null 2>&1 & echo \$! > ffmpeg_pid.txt && \
+              echo 'Запуск UI тестов...' && \
+              mvn clean test \
+                -DsuiteXmlFile='src/test/resources/StartSwap.xml' \
+                -DSEED_PHRASE=\$SEED -DPASSWORD=\$PASS -DPIN=\$PIN ; \
+              echo 'Остановка записи...' && \
+              kill -INT \$(cat ffmpeg_pid.txt) && sleep 2 && \
+              mkdir -p target/allure-results && cp screen_recording.mp4 target/allure-results/
+            "
 
-      - name: Run UI tests
-        run: |
-          mvn clean test \
-            -DsuiteXmlFile='src/test/resources/StartSwap.xml' \
-            -DSEED_PHRASE="$SEED" -DPASSWORD="$PASS" -DPIN="$PIN"
-
-      - name: Stop screen recording
-        if: always()
-        run: |
-          kill -INT $(cat ffmpeg_pid.txt)
-          sleep 2
-
+      # Загружаем видео как артефакт
       - name: Upload screen recording
         if: always()
         uses: actions/upload-artifact@v4
@@ -50,12 +56,7 @@ jobs:
           name: screen-recording
           path: screen_recording.mp4
 
-      - name: Move screen recording to allure-results
-        if: always()
-        run: |
-          mkdir -p target/allure-results
-          cp screen_recording.mp4 target/allure-results/
-
+      # История allure из gh-pages
       - name: Get Allure history
         uses: actions/checkout@v2
         if: always()
@@ -64,6 +65,7 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
+      # Генерация отчета allure
       - name: Allure Report action from marketplace
         uses: simple-elf/allure-report-action@master
         if: always()
@@ -71,6 +73,7 @@ jobs:
           allure_results: target/allure-results
           allure_history: allure-history
 
+      # Деплой отчета в gh-pages
       - name: Deploy report to Github Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v2

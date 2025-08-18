@@ -1,6 +1,6 @@
 FROM maven:3.9.9-eclipse-temurin-17
 
-# Устанавливаем Chrome 138 и Chromedriver 138
+# Устанавливаем Chrome 138 + Chromedriver 138 + утилиты
 RUN apt-get update && apt-get install -y wget gnupg unzip xvfb ffmpeg x11-utils \
  && wget https://storage.googleapis.com/chrome-for-testing-public/138.0.7204.183/linux64/chrome-linux64.zip \
  && unzip chrome-linux64.zip -d /opt/ \
@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y wget gnupg unzip xvfb ffmpeg x11-utils 
  && rm -rf *.zip \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Проверяем версии
+# Проверка установленных версий
 RUN google-chrome --version && chromedriver --version
 
 WORKDIR /workspace

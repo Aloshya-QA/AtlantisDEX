@@ -17,12 +17,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Строим Docker-образ прямо в CI
-      - name: Build Docker image
-        run: |
-          docker build -t ci-chrome138 -f Dockerfile.ci .
+      # Кэш Maven
+      - name: Cache Maven repository
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            maven-${{ runner.os }}-
 
-      # Запускаем контейнер и тесты
+      # Логинимся в GitHub Container Registry (чтобы использовать cache registry)
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Собираем Docker image с кешем
+      - name: Build Docker image with cache
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.ci
+          push: false
+          tags: ci-chrome138:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Запускаем контейнер с тестами
       - name: Run tests inside Docker
         run: |
           docker run --rm \
@@ -31,7 +54,8 @@ jobs:
             -e PASS="$PASS" \
             -e PIN="$PIN" \
             -v ${{ github.workspace }}:/workspace \
-            ci-chrome138 \
+            -v ~/.m2:/root/.m2 \
+            ci-chrome138:latest \
             bash -c "
               cd /workspace && \
               echo 'Запускаем Xvfb...' && \
@@ -40,7 +64,7 @@ jobs:
               ffmpeg -y -video_size 1366x768 -framerate 15 -f x11grab -i :99 \
                 -codec:v libx264 -pix_fmt yuv420p screen_recording.mp4 > /dev/null 2>&1 & echo \$! > ffmpeg_pid.txt && \
               echo 'Запуск UI тестов...' && \
-              mvn clean test \
+              mvn -B clean test \
                 -DsuiteXmlFile='src/test/resources/StartSwap.xml' \
                 -DSEED_PHRASE=\$SEED -DPASSWORD=\$PASS -DPIN=\$PIN ; \
               echo 'Остановка записи...' && \
@@ -48,7 +72,7 @@ jobs:
               mkdir -p target/allure-results && cp screen_recording.mp4 target/allure-results/
             "
 
-      # Загружаем видео как артефакт
+      # Загружаем видео
       - name: Upload screen recording
         if: always()
         uses: actions/upload-artifact@v4
@@ -56,7 +80,7 @@ jobs:
           name: screen-recording
           path: screen_recording.mp4
 
-      # История allure из gh-pages
+      # История allure
       - name: Get Allure history
         uses: actions/checkout@v2
         if: always()
@@ -65,7 +89,7 @@ jobs:
           ref: gh-pages
           path: gh-pages
 
-      # Генерация отчета allure
+      # Allure отчёт
       - name: Allure Report action from marketplace
         uses: simple-elf/allure-report-action@master
         if: always()
@@ -73,7 +97,7 @@ jobs:
           allure_results: target/allure-results
           allure_history: allure-history
 
-      # Деплой отчета в gh-pages
+      # Деплой отчёта
       - name: Deploy report to Github Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v2

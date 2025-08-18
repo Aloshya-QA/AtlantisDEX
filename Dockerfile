@@ -13,7 +13,6 @@ RUN apt-get update && apt-get install -y wget gnupg unzip xvfb ffmpeg x11-utils 
  && rm -rf *.zip \
  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Проверка установленных версий
 RUN google-chrome --version && chromedriver --version
 
 WORKDIR /workspace

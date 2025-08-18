@@ -67,6 +67,11 @@ public class BaseTest {
         HashMap<String, Object> chromePrefs = new HashMap<>();
         options.setExperimentalOption("prefs", chromePrefs);
         options.addArguments("--lang=en");
+        options.addArguments("--headless=new");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--remote-allow-origins=*");
         options.addArguments("--disable-blink-features=AutomationControlled");
         options.setExperimentalOption("excludeSwitches",
                 Collections.singletonList("enable-automation"));

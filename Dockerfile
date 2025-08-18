@@ -25,8 +25,8 @@ RUN wget https://storage.googleapis.com/chrome-for-testing-public/138.0.7204.183
     chmod +x /usr/bin/chromedriver && \
     rm -rf /tmp/chromedriver-linux64 chromedriver-linux64.zip
 
-RUN mkdir -p /opt/hostedtoolcache/setup-chrome/chromedriver/138.0.7204.183/x64 && \
-    ln -s /usr/bin/chromedriver /opt/hostedtoolcache/setup-chrome/chromedriver/138.0.7204.183/x64/chromedriver
+#RUN mkdir -p /opt/hostedtoolcache/setup-chrome/chromedriver/138.0.7204.183/x64 && \
+#    ln -s /usr/bin/chromedriver /opt/hostedtoolcache/setup-chrome/chromedriver/138.0.7204.183/x64/chromedriver
 
 # Проверка версий
 RUN google-chrome --version && chromedriver --version && java -version && mvn -version
